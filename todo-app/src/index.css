@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* Theme variables: default (light) and dark override via data-theme="dark" on body */
+:root {
+  --bg: #f7f7fb;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f0f0f5;
+  --muted: #6b7280;
+  --text: #0f172a;
+  --accent: #7c3aed; /* purple-600 */
+  --completed-bg: rgba(16,185,129,0.08);
+}
+
+body[data-theme='dark'] {
+  --bg: #0f0f1a;
+  --card-bg: #1e1e2e;
+  --card-bg-hover: #252539;
+  --muted: #9ca3af;
+  --text: #ffffff;
+  --accent: #8b5cf6;
+  --completed-bg: rgba(16,185,129,0.12);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Utility classes used in components to adapt to theme */
+.page-bg { background-color: var(--bg); color: var(--text); }
+.card-bg { background-color: var(--card-bg); }
+.card-bg-hover:hover { background-color: var(--card-bg-hover); }
+.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+.completed-bg { background-color: var(--completed-bg); }
+
+/* Kaydırma çubuğunu gizle */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
