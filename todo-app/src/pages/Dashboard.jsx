@@ -8,7 +8,8 @@ const Dashboard = () => {
   const [tasks, setTasks] = useLocalStorage('todo_tasks_v2', []);
   const [activeTab, setActiveTab] = useState('Bugün');
   const [priorityFilter, setPriorityFilter] = useState('Hepsi');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  // Eski satırı bununla değiştir:
+const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
   const [editingTask, setEditingTask] = useState(null);
   
   // POP-UP (Toast) State'i
