@@ -1,7 +1,6 @@
 import React from 'react';
 
 const ProgressCircle = ({ percentage, title, completedCount, totalCount }) => {
-  // SVG Hesaplamaları
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;

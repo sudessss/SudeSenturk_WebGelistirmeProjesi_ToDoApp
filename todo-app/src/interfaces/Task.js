@@ -6,14 +6,13 @@ export const categories = [
 ];
 
 export const recurrenceDefaults = {
-  type: 'none', // 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
-  interval: 1, // every N units
-  byWeekday: null, // for weekly: [0..6] where 0 = Sunday
-  byMonthDay: null, // for monthly: day of month
-  until: null // ISO date string or null
+  type: 'none', 
+  interval: 1, 
+  byWeekday: null, 
+  byMonthDay: null, 
+  until: null 
 };
 
-// Helper to create a normalized task object
 export function createTask({ title, description = '', category = 'okul', dueDate = null, recurrence = {} } = {}) {
   const mergedRecurrence = { ...recurrenceDefaults, ...recurrence };
   return {

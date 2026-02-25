@@ -31,7 +31,7 @@ const EditModal = ({ task, onSave, onClose }) => {
             <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3 outline-none font-bold text-gray-700" />
           </div>
 
-          {/* TAKVİM BURADA */}
+          {/* TAKVİM */}
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase ml-4 mb-1 block">Tarih</label>
             <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full bg-indigo-50/50 border border-indigo-100 rounded-2xl px-5 py-3 outline-none font-bold text-indigo-600 cursor-pointer" />

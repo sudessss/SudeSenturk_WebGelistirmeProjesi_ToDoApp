@@ -1,8 +1,7 @@
 import React from 'react';
 
 const TaskCard = ({ task, onToggle, onDelete, onEdit }) => {
-  // Status 'done' ise başlık çizili ve soluk görünür
-  const isDone = task.status === 'done';
+const isDone = task.status === 'done';
 
   return (
     <div className="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-50 group hover:shadow-md transition-all mb-4">
