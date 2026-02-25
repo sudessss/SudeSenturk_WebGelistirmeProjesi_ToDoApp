@@ -75,12 +75,23 @@ Durum: Production Ready (Canlıda)
 ℹ️ Hakkında (About)
 Bu proje, modern web geliştirme standartlarını öğrenmek amacıyla geliştirilmiş, React ve Vite ekosistemine dayalı bir görev yönetim uygulamasıdır. Başlangıç aşamasında eğitim materyallerinden faydalanılmış olsa da; projenin deployment (yayına alma) süreçleri, terminal üzerinden Netlify CLI yönetimi ve klasör yapısı optimizasyonları tamamen şahsım tarafından yürütülmüştür.
 
-## 🎥 Uygulama Kullanım Videosu
+## 🎥 Uygulama Demo Videosu
+> **Not:** Video GitHub üzerinde `.mov` formatında olduğu için aşağıda bir önizleme oynatıcısı olarak eklenmiştir. Eğer görünmezse dosyaya tıklayarak izleyebilirsiniz.
 
-[ToDo App Kullanım Videosunu İzlemek/İndirmek için tıklayın](./ToDoApp_KullanimVideosu.mov)
+<div align="center">
+  <video src="ToDoApp_KullanimVideosu.mov" width="100%" controls></video>
+</div>
 
-### 🖼️ Uygulama Ekran Görüntüleri
+---
 
-![Genel Görünüm](ToDoApp_Hepsisayfasinda_TumGosterimler.png)
-![Veri Düzenleme](ToDoApp_VeriDuzenleme.png)
+## 🖼️ Uygulama Ekran Görüntüleri
+Aşağıda uygulamanın genel arayüzü ve düzenleme moduna ait görseller yer almaktadır:
+
+<div align="center">
+  <img src="ToDoApp_Hepsisayfasinda_TumGosterimler.png" width="49%" alt="Genel Görünüm" />
+  <img src="ToDoApp_VeriDuzenleme.png" width="49%" alt="Veri Düzenleme" />
+</div>
+
+---
+
 ---
