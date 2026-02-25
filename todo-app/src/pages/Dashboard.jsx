@@ -1,18 +1,32 @@
-import React, { useState, useMemo, useEffect } from 'react'; // useEffect eklendi
+import React, { useState, useMemo, useEffect } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 import TaskCard from '../components/TaskCard';
 import EditModal from '../components/EditModal';
 import ProgressCircle from '../components/ProgressCircle';
 
 const Dashboard = () => {
+
+  // ===== TIMEZONE SAFE DATE UTILS (Mantık Korundu) =====
+  const getToday = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
+  };
+
+  const getTomorrow = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  };
+
+  // ===== STATE =====
   const [tasks, setTasks] = useLocalStorage('todo_tasks_v2', []);
   const [activeTab, setActiveTab] = useState('Bugün');
   const [priorityFilter, setPriorityFilter] = useState('Hepsi');
-  // Eski satırı bununla değiştir:
-const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
+
+  const [selectedDate, setSelectedDate] = useState(getToday()); 
   const [editingTask, setEditingTask] = useState(null);
-  
-  // POP-UP (Toast) State'i
   const [showToast, setShowToast] = useState(false);
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -25,40 +39,46 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
     { id: 'done', title: 'Bitti', icon: '✅' }
   ];
 
-  // Toast mesajını otomatik kapatma
+  // ===== TOAST =====
   useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 3000);
-      return () => clearTimeout(timer);
-    }
+    if (!showToast) return;
+    const t = setTimeout(() => setShowToast(false), 3000);
+    return () => clearTimeout(t);
   }, [showToast]);
 
+  // ===== FILTERED TASKS =====
   const visibleTasks = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    
+    const today = getToday();
+    const tomorrow = getTomorrow();
+
     return tasks.filter(task => {
-      const tabMatch = (activeTab === 'Bugün' && task.dueDate === today) ||
-                       (activeTab === 'Yarın' && task.dueDate === tomorrow) ||
-                       (activeTab === 'Hepsi');
-      const priMatch = priorityFilter === 'Hepsi' || task.priority === priorityFilter;
+      const tabMatch =
+        (activeTab === 'Bugün' && task.dueDate === today) ||
+        (activeTab === 'Yarın' && task.dueDate === tomorrow) ||
+        (activeTab === 'Hepsi');
+
+      const priMatch =
+        priorityFilter === 'Hepsi' || task.priority === priorityFilter;
+
       return tabMatch && priMatch;
     });
   }, [tasks, activeTab, priorityFilter]);
 
+  // ===== STATS =====
   const stats = useMemo(() => {
     const total = visibleTasks.length;
     const done = visibleTasks.filter(t => t.status === 'done').length;
     return {
-      percentage: total === 0 ? 0 : Math.round((done / total) * 100),
+      percentage: total ? Math.round((done / total) * 100) : 0,
       done,
       total
     };
   }, [visibleTasks]);
 
+  // ===== ADD TASK =====
   const handleAddTask = () => {
     if (!newTaskTitle.trim()) return;
-    
+
     const newTask = {
       id: crypto.randomUUID(),
       title: newTaskTitle,
@@ -66,32 +86,31 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
       priority: selectedPriority,
       status: 'todo',
       completed: false,
-      dueDate: selectedDate
+      dueDate: selectedDate 
     };
-    
+
     setTasks(prev => [newTask, ...prev]);
-    setNewTaskTitle(""); 
+    setNewTaskTitle("");
     setNewTaskDesc("");
-    
-    // Pop-up'ı göster
     setShowToast(true);
   };
 
+  // ===== STATUS FLOW =====
   const nextStatus = (id) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        const flow = { 'todo': 'in-progress', 'in-progress': 'done', 'done': 'todo' };
-        const updatedStatus = flow[t.status];
-        return { ...t, status: updatedStatus, completed: updatedStatus === 'done' };
-      }
-      return t;
-    }));
+    setTasks(prev =>
+      prev.map(t => {
+        if (t.id !== id) return t;
+        const flow = { todo: 'in-progress', 'in-progress': 'done', done: 'todo' };
+        const status = flow[t.status];
+        return { ...t, status, completed: status === 'done' };
+      })
+    );
   };
 
   return (
     <div className="relative min-h-screen bg-[#F4F7FF] p-4 font-sans text-[#1E293B]">
-      
-      {/* BAŞARI POP-UP (TOAST) */}
+
+      {/* TOAST (Orijinal Animasyonlu Tasarım) */}
       {showToast && (
         <div className="fixed top-10 right-10 z-50 animate-bounce-in">
           <div className="bg-indigo-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-indigo-400">
@@ -105,42 +124,46 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
       )}
 
       <div className="max-w-6xl mx-auto">
-        
-        {/* ÜST PANEL: FORM VE İLERLEME */}
+
+        {/* ÜST PANEL: INPUT VE PROGRESS (Orijinal Tasarım) */}
         <div className="flex flex-col lg:flex-row gap-6 mb-10 items-stretch">
           <div className="lg:w-[65%] bg-white p-8 rounded-[3rem] shadow-xl border border-white">
             <div className="flex justify-between items-start gap-4 mb-2">
-              <input 
-                value={newTaskTitle} 
-                onChange={(e) => setNewTaskTitle(e.target.value)} 
-                placeholder="Yeni bir görev ekle..." 
-                className="w-full text-lg font-bold outline-none placeholder:text-gray-200" 
+              <input
+                value={newTaskTitle}
+                onChange={e => setNewTaskTitle(e.target.value)}
+                placeholder="Yeni bir görev ekle..."
+                className="w-full text-lg font-bold outline-none placeholder:text-gray-200"
               />
-              <input 
-                type="date" 
-                value={selectedDate} 
-                onChange={(e) => setSelectedDate(e.target.value)} 
-                className="bg-indigo-50 text-indigo-600 text-[11px] font-black p-2 px-3 rounded-xl border-none outline-none cursor-pointer min-w-[100px] shrink-0" 
+
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                className="bg-indigo-50 text-indigo-600 text-[11px] font-black p-2 px-3 rounded-xl border-none outline-none cursor-pointer min-w-[100px] shrink-0"
               />
             </div>
-            <textarea 
-              value={newTaskDesc} 
-              onChange={(e) => setNewTaskDesc(e.target.value)} 
-              placeholder="Açıklama eklemek istiyorsanız buraya yazın" 
-              className="w-full text-xs outline-none min-h-[60px] text-gray-400 resize-none font-medium" 
+
+            <textarea
+              value={newTaskDesc}
+              onChange={e => setNewTaskDesc(e.target.value)}
+              placeholder="Açıklama eklemek istiyorsanız buraya yazın"
+              className="w-full text-xs outline-none min-h-[60px] text-gray-400 resize-none font-medium"
             />
+
             <div className="flex justify-between items-center border-t pt-4">
-              <select 
-                value={selectedPriority} 
-                onChange={(e) => setSelectedPriority(e.target.value)} 
+              <select
+                value={selectedPriority}
+                onChange={e => setSelectedPriority(e.target.value)}
                 className="bg-gray-50 px-3 py-2 rounded-xl text-[9px] font-black outline-none border border-gray-100 cursor-pointer"
               >
                 <option value="Yüksek">🔴 YÜKSEK</option>
                 <option value="Orta">🟡 ORTA</option>
                 <option value="Düşük">🟢 DÜŞÜK</option>
               </select>
-              <button 
-                onClick={handleAddTask} 
+
+              <button
+                onClick={handleAddTask}
                 className="bg-indigo-600 text-white px-8 py-2.5 rounded-2xl text-[10px] font-black uppercase hover:scale-105 transition-all shadow-lg shadow-indigo-100"
               >
                 Kaydet
@@ -149,20 +172,20 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
           </div>
 
           <ProgressCircle 
-            percentage={stats.percentage} 
-            title={activeTab} 
-            completedCount={stats.done} 
-            totalCount={stats.total} 
+             percentage={stats.percentage} 
+             title={activeTab} 
+             completedCount={stats.done} 
+             totalCount={stats.total} 
           />
         </div>
 
-        {/* FİLTRELEME NAVİGASYONU */}
+        {/* FİLTRELEME NAVİGASYONU (Orijinal Tasarım) */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-8 bg-white/50 backdrop-blur-sm p-4 rounded-[2rem] border border-white shadow-sm">
           <div className="flex gap-2 bg-white/80 p-1 rounded-xl shadow-inner">
-            {['Bugün', 'Yarın', 'Hepsi'].map((tab) => (
-              <button 
-                key={tab} 
-                onClick={() => setActiveTab(tab)} 
+            {['Bugün', 'Yarın', 'Hepsi'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
                 className={`px-5 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === tab ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-indigo-400'}`}
               >
                 {tab.toUpperCase()}
@@ -174,7 +197,7 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
             {['Hepsi', 'Yüksek', 'Orta', 'Düşük'].map(p => (
               <button 
                 key={p} 
-                onClick={() => setPriorityFilter(p)} 
+                onClick={() => setPriorityFilter(p)}
                 className={`px-3 py-1.5 rounded-full text-[9px] font-black border transition-all ${priorityFilter === p ? 'border-indigo-600 bg-indigo-50 text-indigo-600 shadow-sm' : 'border-gray-100 text-gray-400 bg-white/50 hover:border-indigo-200'}`}
               >
                 {p.toUpperCase()}
@@ -183,7 +206,7 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
           </div>
         </div>
 
-        {/* KANBAN BOARD */}
+        {/* KANBAN BOARD (Orijinal Tasarım) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {columns.map(col => {
             const colTasks = visibleTasks.filter(t => t.status === col.id);
@@ -193,15 +216,15 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
                   <span>{col.icon} {col.title}</span>
                   <span className="bg-white px-2 py-0.5 rounded-lg text-indigo-600 shadow-sm">{colTasks.length}</span>
                 </h2>
-                
+
                 <div className="space-y-4">
                   {colTasks.map(task => (
-                    <TaskCard 
-                      key={task.id} 
-                      task={task} 
-                      onToggle={() => nextStatus(task.id)} 
-                      onDelete={() => setTasks(prev => prev.filter(t => t.id !== task.id))} 
-                      onEdit={() => setEditingTask(task)} 
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onToggle={() => nextStatus(task.id)}
+                      onDelete={() => setTasks(prev => prev.filter(t => t.id !== task.id))}
+                      onEdit={() => setEditingTask(task)}
                     />
                   ))}
                 </div>
@@ -211,16 +234,18 @@ const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('
         </div>
       </div>
 
+      {/* EDIT MODAL */}
       {editingTask && (
-        <EditModal 
-          task={editingTask} 
-          onSave={(updated) => {
-            setTasks(prev => prev.map(t => t.id === updated.id ? updated : t));
+        <EditModal
+          task={editingTask}
+          onSave={(u) => {
+            setTasks(prev => prev.map(t => t.id === u.id ? u : t));
             setEditingTask(null);
-          }} 
-          onClose={() => setEditingTask(null)} 
+          }}
+          onClose={() => setEditingTask(null)}
         />
       )}
+
     </div>
   );
 };
